@@ -9,7 +9,7 @@ services:
       - mongo-data:/data/db
 
   backend:
-    image: puneeth11/mean-app-backend
+    build: ./backend
     restart: always
     container_name: backend
     ports:
@@ -20,7 +20,7 @@ services:
       - mongo
 
   frontend:
-    image: puneeth11/mean-app-frontend
+    build: ./frontend
     restart: always
     container_name: frontend
     ports:
