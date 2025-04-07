@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    restart: always
+    container_name: backend
+    ports:
+      - "8082:8082"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/mean_crud_db
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    restart: always
+    container_name: frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
