@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -13,14 +13,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Login to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Build Docker Images
-      run: docker compose build
+    - name: Build Backend Docker Image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/mean-app-backend:latest ./backend
 
-    - name: Push Docker Images
-      run: docker compose push
+    - name: Build Frontend Docker Image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/mean-app-frontend:latest ./frontend
+
+    - name: Push Backend Docker Image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/mean-app-backend:latest
+
+    - name: Push Frontend Docker Image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/mean-app-frontend:latest
 
     - name: SSH and Deploy on VM
       uses: appleboy/ssh-action@master
@@ -30,6 +39,6 @@ jobs:
         key: ${{ secrets.VM_KEY }}
         script: |
           cd ~/mean-app
-          docker compose pull
-          docker compose down
-          docker compose up -d --build
+          docker-compose pull
+          docker-compose down
+          docker-compose up -d --build
