@@ -107,7 +107,7 @@ volumes:
 ```
 
 ### 4. ☁️ Cloud Deployment (AWS EC2)
-- Launched an **Ubuntu 20.04 EC2 instance** under AWS Free Tier.
+- Launched an **Ubuntu EC2 instance** under AWS Free Tier.
 - Installed **Docker** and **Docker Compose**.
 - Deployed the app using pre-built Docker images in `/home/ubuntu/mean-app/`:
 ```yaml
