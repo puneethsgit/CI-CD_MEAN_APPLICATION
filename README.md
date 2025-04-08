@@ -247,7 +247,7 @@ Tested accessibility after removing direct port rules — app remained available
 
 ## 🌐 Application Access
 - http://ec2-51-21-52-120.eu-north-1.compute.amazonaws.com
-- http://51.21.52.120/tutorials
+- http://51.21.52.120/
 
 > ⚠️ **Disclaimer**: If the above links are not working, the EC2 instance might be turned off. Please feel free to reach out via email at **puneethspunii@gmail.com** or contact **8296986769** to request reactivation.
 
