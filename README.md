@@ -253,7 +253,7 @@ Tested accessibility after removing direct port rules — app remained available
 
 ---
 
-## 🎯 Key Learnings
+## 🎯 Key Learnings.
 - Docker multi-stage builds and image optimization
 - End-to-end CI/CD automation with GitHub Actions
 - SSH-based remote deployment techniques
