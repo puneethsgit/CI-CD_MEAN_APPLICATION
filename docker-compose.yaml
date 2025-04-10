@@ -13,7 +13,7 @@ services:
     restart: always
     container_name: backend
     ports:
-      - "8082:8082"
+      - "8080:8080"
     environment:
       - MONGO_URL=mongodb://mongo:27017/mean_crud_db
     depends_on:
