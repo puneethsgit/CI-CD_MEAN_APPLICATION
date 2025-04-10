@@ -6,7 +6,13 @@ const app = express();
 // parse requests of content-type - application/json
 app.use(express.json());
 // Middleware to handle CORS
-app.use(cors());
+// Enable CORS with specific configuration
+app.use(cors({
+  origin: 'http://51.21.52.120:8081', // Allow requests from this origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allow these headers
+}));
+
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
