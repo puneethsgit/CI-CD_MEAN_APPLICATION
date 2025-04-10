@@ -87,7 +87,7 @@ services:
     restart: always
     container_name: backend
     ports:
-      - "8082:8082"
+      - "8080:8080"
     environment:
       - MONGO_URL=mongodb://mongo:27017/mean_crud_db
     depends_on:
@@ -116,33 +116,56 @@ services:
     image: mongo
     restart: always
     container_name: mongo
-    ports:
-      - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - mean-app-network
 
   backend:
     image: puneeth11/mean-app-backend
     restart: always
     container_name: backend
-    ports:
-      - "8082:8082"
+    expose:
+      - "8080"
     environment:
       - MONGO_URL=mongodb://mongo:27017/mean_crud_db
     depends_on:
       - mongo
+    networks:
+      - mean-app-network
 
   frontend:
     image: puneeth11/mean-app-frontend
     restart: always
     container_name: frontend
-    ports:
-      - "8081:80"
+    expose:
+      - "80"
     depends_on:
       - backend
+    networks:
+      - mean-app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"  # Only expose Nginx to host
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - mean-app-network
 
 volumes:
   mongo-data:
+
+networks:
+  mean-app-network:
+    driver: bridge
+
+
 ```
 - Assigned **Elastic IP** for consistent access to the deployed app.
 
@@ -214,12 +237,14 @@ jobs:
 
 ### 6. 🌐 Nginx Reverse Proxy Configuration
 Set up Nginx to listen on port **80** and route traffic appropriately:
-```nginx
+```nginx.conf
 server {
     listen 80;
+    server_name _;
 
-    location /api/ {
-        proxy_pass http://localhost:8082/;
+    # Frontend Angular application
+    location / {
+        proxy_pass http://frontend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -227,15 +252,36 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
-    location / {
-        proxy_pass http://localhost:8081/;
+    # Special proxy for localhost:8080 API calls from Angular
+    location /api/tutorials {
+        proxy_pass http://backend:8080/api/tutorials;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # CORS headers
+        add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Error pages
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
     }
 }
+
 ```
 Tested accessibility after removing direct port rules — app remained available via the reverse proxy.
 
